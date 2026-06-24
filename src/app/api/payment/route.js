@@ -2,18 +2,21 @@ import Razorpay from "razorpay";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET,
-});
-
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
-  throw new Error("Missing Razorpay environment variables");
-}
-
-
 export async function POST(request) {
   try {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_SECRET) {
+      console.error("Missing Razorpay environment variables");
+      return Response.json(
+        { message: "Server misconfiguration: Missing payment credentials" },
+        { status: 500 }
+      );
+    }
+
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET,
+    });
+
     const { applicationId } = await request.json();
     
     console.log("Creating payment order for application:", applicationId);
